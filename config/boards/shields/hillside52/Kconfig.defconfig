@@ -4,7 +4,7 @@
 if SHIELD_HILLSIDE52_LEFT
 
 config ZMK_KEYBOARD_NAME
-    default "Hillside52"
+    default "Alex's Hillside"
 
 config ZMK_SPLIT_BLE_ROLE_CENTRAL
     default y
