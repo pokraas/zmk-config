@@ -25,20 +25,44 @@
 
 
 / {
+        macros {
+                word_delete: word_delete {
+                        label = "word_delete";
+                        compatible = "zmk,behavior-macro";
+                        wait-ms = <30>;
+                        tap-ms = <30>;
+                        #binding-cells = <0>;
+                        bindings = <&macro_press(LALT), &kp LEFT, &kp DEL, &macro_release(LALT)>;
+                };
+                
+        };
+
+        behaviors {
+                bspc_word_delete: backspace_word_delete {
+                        compatible = "zmk,behavior-hold-tap";
+                        label = "BACKSPACE_WORD_DELETE";
+                        #binding-cells = <2>;
+                        flavor = "hold-preferred";
+                        tapping-term-ms = <10000>;  // so it never triggers
+                        bindings = <&word_delete>, <&kp>;
+                        hold-trigger-key-positions = <30>;  // Position of the key that would trigger the word_delete macro
+                };
+        };
+
         keymap {
                 compatible = "zmk,keymap";
 
                 default_layer {
 /* QWERTY
  * -------------------------------------------------------------------------------------------------------------------------------------
- * | `     |   Q   |   W   |   E   |   R   |   T   |-----------------------------------|   Y   |   U   |   I   |   O   |   P   | BKSPC |
- * | TAB   |   A   |   S   |   D   |   F   |   G   |-----------------------------------|   H   |   J   |   K   |   L   |   ;   | ENTER |
+ * | `     |   Q   |   W   |   E   |   R   |   T   |-----------------------------------|   Y   |   U   |   I   |   O   |   ;   | BKSPC |
+ * | TAB   |   A   |   S   |   D   |   F   |   G   |-----------------------------------|   H   |   J   |   K   |   L   |   P   | ENTER |
  * | SHIFT |   Z   |   X   |   C   |   V   |   B   |   '   |-------------------|   /   |   N   |   M   |   ,   |   .   |  Up   | SHIFT |
  * | Mute  |  ESC  | CTRL  |-------|  GUI  |  ALT  |SK SHFT|  Nav  |---|  Sym  | SPACE |  ALT  |  GUI  |-------| Left  | Down  | Right |
  */
                         bindings = <
-&kp  GRAVE    &kp  Q        &kp  W        &kp  E        &kp  R        &kp  T                                                                         &kp  Y        &kp  U        &kp  I        &kp  O        &kp  P        &kp  BSPC
-&kp  TAB      &kp  A        &kp  S        &kp  D        &kp  F        &kp  G                                                                         &kp  H        &kp  J        &kp  K        &kp  L        &kp  SEMI     &kp  ENTER
+&kp  GRAVE    &kp  Q        &kp  W        &kp  E        &kp  R        &kp  T                                                                         &kp  Y        &kp  U        &kp  I        &kp  O        &kp  SEMI     &kp  BSPC
+&kp  TAB      &kp  A        &kp  S        &kp  D        &kp  F        &kp  G                                                                         &kp  H        &kp  J        &kp  K        &kp  L        &kp  P        &kp  ENTER
 &kp  LSHFT    &kp  Z        &kp  X        &kp  C        &kp  V        &kp  B        &kp  SQT                                           &kp  SLASH    &kp  N        &kp  M        &kp  COMMA    &kp  DOT      &kp  UP       &kp  RSHFT
 &kp  C_MUTE   &kp  ESC      &kp  LCTRL                  &kp  LGUI     &kp  LALT     &sk  LSHIFT    &mo  NAV_L            &mo  SYM_L    &kp  SPACE    &kp  LALT     &kp  RGUI                   &kp  LEFT     &kp  DOWN     &kp  RIGHT
                         >;
@@ -94,8 +118,8 @@
 &kp  Copy     &kp  N1       &kp  N2       &kp  N3       &kp  N4       &kp  N5                                                                        &kp   N6      &kp  N7      &kp   N8      &kp   N9      &kp  N0       &trans
 &kp  Cut      &kp  LGUI     &kp  LALT     &kp  LCTRL    &kp  LSHFT    &kp  Paste                                                                     &kp   PG_UP   &kp  LEFT    &kp   UP      &kp   DOWN    &kp  RIGHT    &kp PG_DN
 &trans        &kp  F1       &kp  F2       &kp  F3       &kp  F4       &kp  F5       &kp Undo                                           &kp  Redo     &kp   F6      &kp  F7      &kp   F8      &kp   F9      &kp  F10      &trans
-&kp  F11      &kp  F12      &trans                      &trans        &trans        &trans        &trans                 &mo ADJ_L     &trans        &trans        &trans                     &kp  RCTRL    &kp  HOME     &kp  END
-                        >;
+&kp  F11      &kp  F12      &trans                      &trans        &trans        &word_delete        &trans           &mo ADJ_L     &trans        &trans        &trans                     &kp  RCTRL    &kp  HOME     &kp  END
+                        >;                                                        // ^TODO: this is a test
 			
                         sensor-bindings = <&inc_dec_kp PG_UP PG_DN &inc_dec_kp C_VOL_UP C_VOL_DN>;
                 };
@@ -128,10 +152,10 @@
  * ----------------|       |-------|       |       |       |       |---|       |       |       |       |-------| CTRL  |----------------
  */
                         bindings = <
-&none         &to  QWERTY_L &to  DVORAK_L &to  COLEMK_L &none         &none                                                                             &none             &kp PRINTSCREEN    &none         &ext_power EP_OFF  &ext_power EP_ON &none
-&none         &bt  BT_SEL 0 &bt  BT_SEL 1 &bt  BT_SEL 2 &bt  BT_SEL 3 &bt  BT_SEL 4                                                                     &none             &none              &none            &none           &none            &none
-&bootloader   &reset        &none         &out OUT_USB  &out OUT_BLE  &none         &bt BT_CLR                                         &none            &none             &none              &none            &none           &none            &trans
-&none         &none         &trans                      &trans        &trans        &trans        &trans                 &trans        &trans           &trans            &trans                              &kp  RCTRL      &none            &none
+&none         &to  QWERTY_L &to  DVORAK_L &to  COLEMK_L &none         &none                                                                             &none             &kp PRINTSCREEN    &none          &ext_power EP_OFF  &ext_power EP_ON &none
+&none         &bt  BT_SEL 0 &bt  BT_SEL 1 &bt  BT_SEL 2 &bt  BT_SEL 3 &bt  BT_SEL 4                                                                     &none             &bootloader        &sys_reset     &none           &none            &none
+&bootloader   &reset        &none         &out OUT_USB  &out OUT_BLE  &none         &bt BT_CLR                                         &none            &none             &none              &none          &none           &none            &trans
+&none         &none         &trans                      &trans        &trans        &trans        &trans                 &trans        &trans           &trans            &trans                            &kp  RCTRL      &none            &none
                         >;
 			
                         sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
